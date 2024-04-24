@@ -1,0 +1,5 @@
+docker network create -d bridge kafka-network
+docker run --detach  --network kafka-network --name zookeeper  ubuntu/zookeeper
+docker run --detach -e TZ=UTC  --name kafka --network kafka-network -p 9092:9092  apache/kafka
+
+docker exec -it kafka /opt/kafka/bin/kafka-topics.sh --create --topic twitter --bootstrap-server localhost:9092
