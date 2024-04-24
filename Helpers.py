@@ -4,12 +4,13 @@ from typing import Any, Dict, Generator
 import pandas as pd
 import pathlib
 import json
+
 class Reader:
     """Reader class."""
 
     def __init__(self, path: str) -> None:
         """Class constructor."""
-        self._path = pathlib.Path(path)
+        self._path = path
 
     def read(self) -> Generator[Dict[str, Any], None, None]:
         """Read data from a .csv file and return it as a generator.
@@ -17,15 +18,23 @@ class Reader:
         Yields:
             Generator[Dict[str, Any], None, None]: Data generator.
         """
+        # Manually define field names and their types
+        fieldnames = ["Tweet ID", "Entity", "Sentiment", "Tweet content"]
+        fieldtypes = [int, str, str, str]
+
         with open(self._path, 'r', newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            fieldnames = reader.fieldnames
+            reader = csv.DictReader(csvfile, fieldnames=fieldnames)
+            
+            # Skip the header row
+            next(reader)
 
             for row in reader:
                 data = {}
-                for field in fieldnames:
-                    data[field] = row[field]
+                for field, fieldtype in zip(fieldnames, fieldtypes):
+                    # Convert the value to the specified type
+                    data[field] = fieldtype(row[field])
                 yield data
+
 
     def read_with_sleep(self) -> Generator[Dict[str, Any], None, None]:
         """Read data from a .csv file with simulated delay and return it as a generator.
