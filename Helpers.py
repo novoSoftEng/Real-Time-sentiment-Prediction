@@ -12,7 +12,7 @@ class Reader:
         """Class constructor."""
         self._path = path
 
-    def read(self) -> Generator[Dict[str, Any], None, None]:
+    def read(self,drop = False) -> Generator[Dict[str, Any], None, None]:
         """Read data from a .csv file and return it as a generator.
 
         Yields:
@@ -32,19 +32,22 @@ class Reader:
                 data = {}
                 for field, fieldtype in zip(fieldnames, fieldtypes):
                     # Convert the value to the specified type
-                    data[field] = fieldtype(row[field])
+                    if drop and field != 'Sentiment':
+                        data[field] = fieldtype(row[field])
+                    
+                        
                 yield data
 
 
-    def read_with_sleep(self) -> Generator[Dict[str, Any], None, None]:
+    def read_with_sleep(self, drop = False) -> Generator[Dict[str, Any], None, None]:
         """Read data from a .csv file with simulated delay and return it as a generator.
 
         Yields:
             Generator[Dict[str, Any], None, None]: Data generator.
         """
-        for data in self.read():
+        for data in self.read(drop):
             # Simulates a sample rate of 1 second for a sensor
-            time.sleep(1)
+            time.sleep(10)
             yield data
 
 
