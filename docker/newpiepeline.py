@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[3]:
+# In[1]:
 
 
 from pyspark.ml import Pipeline
@@ -15,27 +15,27 @@ import nltk
 from nltk.corpus import stopwords
 
 
-# In[4]:
+# In[2]:
 
 
-# Configuration de NLTK
+# Configure NLTK
 nltk.download('stopwords')
 stop_words = stopwords.words('english')
 
 
-# In[5]:
+# In[3]:
 
 
-# Création de la session Spark
+# Create Spark session
 spark = SparkSession.builder \
     .appName("Twitter Sentiment Analysis") \
     .getOrCreate()
 
 
-# In[6]:
+# In[4]:
 
 
-# Définir le schéma pour le fichier CSV
+# Define schema for the CSV file
 schema = StructType([
     StructField("Tweet ID", IntegerType(), True),
     StructField("Entity", StringType(), True),
@@ -44,57 +44,93 @@ schema = StructType([
 ])
 
 
+# In[5]:
+
+
+# Load CSV data with specified schema
+df = spark.read.csv("twitter_training.csv", header=True, schema=schema)
+
+
+# In[6]:
+
+
+# Replace null values in the 'Tweet content' column with an empty string
+df_cleaned = df.withColumn('Tweet content', when(col('Tweet content').isNull(), '').otherwise(col('Tweet content')))
+
+
 # In[7]:
 
 
-# Charger les données CSV avec le schéma spécifié
-df = spark.read.csv("twitter_training.csv", header=True, schema=schema)
+# Define preprocessing stages
+tokenizer = Tokenizer(inputCol="Tweet content", outputCol="words")
+stopwords_remover = StopWordsRemover(inputCol="words", outputCol="filtered_words")
+hashing_tf = HashingTF(inputCol="filtered_words", outputCol="raw_features")
+idf = IDF(inputCol="raw_features", outputCol="features")
 
 
 # In[8]:
 
 
-# Remplacer les valeurs nulles dans la colonne 'Tweet content' par une chaîne vide
-df_cleaned = df.withColumn('Tweet content', when(col('Tweet content').isNull(), '').otherwise(col('Tweet content')))
+# Indexer for Sentiment column (in preprocessing)
+sentiment_indexer = StringIndexer(inputCol="Sentiment", outputCol="label")
 
 
 # In[9]:
 
 
-# Définir les étapes de la pipeline
-tokenizer = Tokenizer(inputCol="Tweet content", outputCol="words")
-stopwords_remover = StopWordsRemover(inputCol="words", outputCol="filtered_words")
-hashing_tf = HashingTF(inputCol="filtered_words", outputCol="raw_features")
-idf = IDF(inputCol="raw_features", outputCol="features")
-indexer = StringIndexer(inputCol="Sentiment", outputCol="label",handleInvalid="skip")
-assembler = VectorAssembler(inputCols=["features"], outputCol="final_features")
-lr = LogisticRegression(featuresCol='final_features', labelCol='label')
+# Create the preprocessing pipeline (with indexer)
+preprocessing_pipeline = Pipeline(stages=[tokenizer, stopwords_remover, hashing_tf, idf, sentiment_indexer])
 
-df_cleaned= indexer.fit(df_cleaned).transform(df_cleaned)
+
 # In[10]:
 
 
-# Créer la pipeline
-pipeline = Pipeline(stages=[tokenizer, stopwords_remover, hashing_tf, idf, assembler, lr])
+# Fit and transform the preprocessing pipeline
+preprocessed_data = preprocessing_pipeline.fit(df_cleaned).transform(df_cleaned)
 
 
 # In[11]:
 
 
-# Division des données en ensembles d'entraînement et de test
-train_data, test_data = df_cleaned.randomSplit([0.8, 0.2], seed=123)
+# Split data into training and test sets
+train_data, test_data = preprocessed_data.randomSplit([0.8, 0.2], seed=123)
 
 
 # In[12]:
 
 
-# Entraînement de la pipeline
-pipeline_model = pipeline.fit(train_data)
-pipeline_model.save('pipeline_model')
+# Assemble features for the final pipeline (without indexer)
+final_assembler = VectorAssembler(inputCols=["features"], outputCol="final_features")
 
 
+# In[13]:
 
 
+# Logistic Regression model
+lr = LogisticRegression(featuresCol='final_features', labelCol='label')
 
+
+# In[14]:
+
+
+# Create the final pipeline (without indexer)
+final_pipeline = Pipeline(stages=[final_assembler, lr])
+
+
+# In[15]:
+
+
+# Train the final pipeline
+pipeline_model = final_pipeline.fit(train_data)
+
+
+# In[16]:
+
+
+# Make predictions on the test data
+predictions = pipeline_model.transform(test_data)
+
+
+# In[17]:
 
 
