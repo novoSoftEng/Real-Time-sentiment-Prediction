@@ -1,0 +1,137 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="col-xs-6 col-sm-6 col-md-5">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xs-6 col-sm-6 col-md-3">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="sentimentPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xs-6 col-sm-6 col-md-5">
+    <div class="card card-style mb-2">
+        <div class="card-body">
+            <div class="chart-container" style="position: relative;">
+                <canvas id="sentimentLineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx1 = document.getElementById('sentimentChart').getContext('2d');
+    var chart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral', 'Irrelevant'],
+            datasets: [{
+                label: 'Sentiment Distribution',
+                data: [{{ sentiment_counts['Positive'] }}, {{ sentiment_counts['Negative'] }}, {{ sentiment_counts['Neutral'] }}, {{ sentiment_counts['Irrelevant'] }}],
+                backgroundColor: [
+                    '#5DA5DA',
+                    '#FAA43A',
+                    '#60BD68',
+                    '#B276B2'
+                ],
+                borderColor: [
+                    '#5DA5DA',
+                    '#FAA43A',
+                    '#60BD68',
+                    '#B276B2'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    var ctx2 = document.getElementById('sentimentPieChart').getContext('2d');
+    var chart2 = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral', 'Irrelevant'],
+            datasets: [{
+                label: 'Sentiment Distribution',
+                data: [{{ sentiment_counts['Positive'] }}, {{ sentiment_counts['Negative'] }}, {{ sentiment_counts['Neutral'] }}, {{ sentiment_counts['Irrelevant'] }}],
+                backgroundColor: [
+                    '#5DA5DA',
+                    '#FAA43A',
+                    '#60BD68',
+                    '#B276B2'
+                ],
+                borderColor: [
+                    '#5DA5DA',
+                    '#FAA43A',
+                    '#60BD68',
+                    '#B276B2'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    var ctx3 = document.getElementById('sentimentLineChart').getContext('2d');
+    var chart3 = new Chart(ctx3, {
+        type: 'line',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral', 'Irrelevant'],
+            datasets: [{
+                label: 'Sentiment Distribution',
+                data: [{{ sentiment_counts['Positive'] }}, {{ sentiment_counts['Negative'] }}, {{ sentiment_counts['Neutral'] }}, {{ sentiment_counts['Irrelevant'] }}],
+                backgroundColor: [
+                    '#5DA5DA',
+                    '#FAA43A',
+                    '#60BD68',
+                    '#B276B2'
+                ],
+                borderColor: [
+                    '#5DA5DA',
+                    '#FAA43A',
+                    '#60BD68',
+                    '#B276B2'
+                ],
+                borderWidth: 1,
+                fill: false // Disable filling under the line
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+</script>
+
+
+{% endblock %}

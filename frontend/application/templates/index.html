@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<div class="col-sm-10 ml-auto mr-auto">
+    <H2>Twitter Data</H2>
+    <div class="table-responsive">
+        <table class="table table-sm" style="width: 10%; font-size: 0.5em;">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Tweet ID</th>
+                    <th scope="col">Entity</th>
+                    <th scope="col">Tweet content</th>
+                    <th scope="col">Sentiment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr>
+                    <td>{{ entry['Tweet ID'] }}</td>
+                    <td>{{ entry['Entity'] }}</td>
+                    <td>{{ entry['Tweet content'] }}</td>
+                    <td>{{ entry['Sentiment'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
