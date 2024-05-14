@@ -38,7 +38,7 @@ services:
     container_name: mongodb
     hostname: mongodb
     ports:
-      - "27017:27017"
+      - "27018:27017"
     networks:
       - kafka-network
 

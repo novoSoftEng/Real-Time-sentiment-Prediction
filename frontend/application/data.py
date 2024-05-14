@@ -2,7 +2,7 @@ import pandas as pd
 from pymongo import MongoClient
 
 # Établir une connexion à MongoDB
-client = MongoClient('localhost', 27017)
+client = MongoClient('localhost', 27018)
 db = client['twitter_database']
 collection = db['twitter_collection']
 

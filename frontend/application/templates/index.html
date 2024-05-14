@@ -4,7 +4,7 @@
 <div class="col-sm-10 ml-auto mr-auto">
     <H2>Twitter Data</H2>
     <div class="table-responsive">
-        <table class="table table-sm" style="width: 10%; font-size: 0.5em;">
+        <table class="table table-sm" id="myTable" style="width: 100%; font-size: 0.8em;">
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">Tweet ID</th>
@@ -25,5 +25,37 @@
             </tbody>
         </table>
     </div>
-</div>
+</div> 
+
+<script>
+    var socket = io.connect();
+
+    socket.on('connect', function() {
+        console.log('Connected to server');
+        setInterval(function() {
+            socket.emit('request_table_update');
+        }, 5000); // Refresh every 5 seconds
+    });
+
+    socket.on('request_table_update', function() {
+    console.log('Requesting table update');
+    socket.emit('request_table_update'); // Emit the event again for testing
+    });
+
+    socket.on('update_table', function(data) {
+        var tableBody = document.querySelector('#myTable tbody');
+        tableBody.innerHTML = ''; // Clear existing table rows
+        data.entries.forEach(entry => {
+            var row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${entry['Tweet ID']}</td>
+                <td>${entry['Entity']}</td>
+                <td>${entry['Tweet content']}</td>
+                <td>${entry['Sentiment']}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    });
+</script>
+
 {% endblock %}
