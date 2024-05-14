@@ -6,7 +6,9 @@ from kafka import KafkaConsumer
 import pandas as pd
 from pyspark.ml import PipelineModel
 from pymongo import MongoClient
+from pyspark.ml.feature import StringIndexer , IndexToString
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+from pyspark.sql.functions import col, when
 app = Flask(__name__)
 client = MongoClient('mongodb', 27017)
 db = client['twitter_database']
@@ -14,6 +16,7 @@ collection = db['twitter_collection']
 # Load the pre-trained model
 try:
     model = PipelineModel.load('pipeline_model/')
+    indexer = StringIndexer.load('indexer_model/')
 except Exception as e:
     print(f"Error loading model: {e}")
     model = None
@@ -38,10 +41,14 @@ def predict():
         ])
     # Convert Pandas DataFrame to Spark DataFrame
     spark_df = spark.createDataFrame([json.loads(data)],schema=schema) 
+    spark_df = spark_df.withColumn('Tweet content', when(col('Tweet content').isNull(), '').otherwise(col('Tweet content')))
     print(spark_df.show())
-
+    labels = indexer.labels
     # Transform the DataFrame using the model
     transformed_data = model.transform(spark_df)
+    index_to_string = IndexToString(inputCol="prediction", outputCol="Sentiment", labels=labels)
+    transformed_data =index_to_string.transform(transformed_data)
+    
 
     # Convert Spark DataFrame to Pandas DataFrame
     transformed_df = transformed_data.toLocalIterator()
@@ -56,7 +63,7 @@ def predict():
             tweet_entity = row["Entity"]
             tweet_content = row["Tweet content"]
             
-            prediction = row["prediction"]
+            prediction = row["Sentiment"]
         
         # Create a dictionary with the extracted fields
             data_dict = {"Tweet ID": tweet_id,"Entity":tweet_entity, "Tweet content": tweet_content, "Sentiment": prediction}
@@ -70,7 +77,7 @@ def predict():
     print(list(transformed_df))
     collection.insert_one(res[0])
     
-    return "success"
+    return True
     
 
 if __name__ == '__main__':
