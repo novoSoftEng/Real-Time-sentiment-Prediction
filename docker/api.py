@@ -1,3 +1,4 @@
+import time
 from flask import Flask, jsonify, request
 from pyspark.ml import PipelineModel
 import json
@@ -59,7 +60,7 @@ def predict():
             prediction = row["prediction"]
         
         # Create a dictionary with the extracted fields
-            data_dict = {"Tweet ID": tweet_id,"Entity":tweet_entity, "Tweet content": tweet_content, "Sentiment": prediction}
+            data_dict = {"Tweet ID": tweet_id,"Entity":tweet_entity, "Tweet content": tweet_content, "Sentiment": prediction, "timestamp": time.time()}
             data_dict_list.append(data_dict)
 
         print(data_dict_list[0])
