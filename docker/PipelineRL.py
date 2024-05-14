@@ -70,9 +70,7 @@ indexer = StringIndexer(inputCol="Sentiment", outputCol="label",handleInvalid="s
 assembler = VectorAssembler(inputCols=["features"], outputCol="final_features")
 lr = LogisticRegression(featuresCol='final_features', labelCol='label')
 
-indexer_model = indexer.fit(df_cleaned)
-indexer_model.save('indexer_model')
-df_cleaned= indexer_model.transform(df_cleaned)
+df_cleaned= indexer.fit(df_cleaned).transform(df_cleaned)
 # In[10]:
 
 
@@ -83,14 +81,15 @@ pipeline = Pipeline(stages=[tokenizer, stopwords_remover, hashing_tf, idf, assem
 # In[11]:
 
 
-
+# Division des données en ensembles d'entraînement et de test
+train_data, test_data = df_cleaned.randomSplit([0.8, 0.2], seed=123)
 
 
 # In[12]:
 
 
 # Entraînement de la pipeline
-pipeline_model = pipeline.fit(df_cleaned)
+pipeline_model = pipeline.fit(train_data)
 pipeline_model.save('pipeline_model')
 
 
