@@ -1,5 +1,17 @@
 {% extends 'layout.html' %}
 {% block content %}
+<style>
+    body {
+        background-color: #0f6ab9; /* Light blue background color */
+    }
+    .card-style {
+        background-color: white; /* White background for the card */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+</style>
+
 <div class="col-xs-6 col-sm-6 col-md-5">
     <div class="card card-style mb-2">
         <div class="card-body">
@@ -10,7 +22,7 @@
     </div>
 </div>
 
-<div class="col-xs-6 col-sm-6 col-md-4">
+<div class="col-xs-7 col-sm-6 col-md-4">
     <div class="card card-style mb-2">
         <div class="card-body">
             <div class="chart-container" style="position: relative;">
@@ -26,9 +38,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -68,7 +77,6 @@
         }
     });
 
-
     var ctx2 = document.getElementById('sentimentLineChart').getContext('2d');
     var chart2 = new Chart(ctx2, {
         type: 'line',
@@ -105,7 +113,6 @@
         }
     });
 
-
     var ctx3 = document.getElementById('entityChart').getContext('2d');
     var chart3 = new Chart(ctx3, {
         type: 'bar',
@@ -140,10 +147,5 @@
             }
         }
     });
-
-
-
 </script>
-
-
 {% endblock %}
