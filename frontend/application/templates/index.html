@@ -1,6 +1,5 @@
 {% extends 'layout.html' %}
 {% block content %}
-
 <div class="col-sm-10 ml-auto mr-auto">
     <H2>Twitter Data</H2>
     <div class="table-responsive">
@@ -8,15 +7,17 @@
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">Tweet ID</th>
+                    <th scope="col">Time Stamp</th>
                     <th scope="col">Entity</th>
                     <th scope="col">Tweet content</th>
                     <th scope="col">Sentiment</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tableBody">
                 {% for entry in entries %}
                 <tr>
                     <td>{{ entry['Tweet ID'] }}</td>
+                    <td>{{ entry['timestamp'] }}</td>
                     <td>{{ entry['Entity'] }}</td>
                     <td>{{ entry['Tweet content'] }}</td>
                     <td>{{ entry['Sentiment'] }}</td>
@@ -28,34 +29,31 @@
 </div> 
 
 <script>
-    var socket = io.connect();
+    function updateTable() {
+        fetch('/update_table')
+            .then(response => response.json())
+            .then(data => {
+                var tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = ''; // Clear existing table rows
+                data.entries.forEach(entry => {
+                    var row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry['Tweet ID']}</td>
+                        <td>${entry['timestamp']}</td>
+                        <td>${entry['Entity']}</td>
+                        <td>${entry['Tweet content']}</td>
+                        <td>${entry['Sentiment']}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+    }
 
-    socket.on('connect', function() {
-        console.log('Connected to server');
-        setInterval(function() {
-            socket.emit('request_table_update');
-        }, 5000); // Refresh every 5 seconds
-    });
+    // Update the table every 5 seconds
+    setInterval(updateTable, 5000);
 
-    socket.on('request_table_update', function() {
-    console.log('Requesting table update');
-    socket.emit('request_table_update'); // Emit the event again for testing
-    });
-
-    socket.on('update_table', function(data) {
-        var tableBody = document.querySelector('#myTable tbody');
-        tableBody.innerHTML = ''; // Clear existing table rows
-        data.entries.forEach(entry => {
-            var row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${entry['Tweet ID']}</td>
-                <td>${entry['Entity']}</td>
-                <td>${entry['Tweet content']}</td>
-                <td>${entry['Sentiment']}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-    });
+    // Initial update when the page loads
+    updateTable();
 </script>
 
 {% endblock %}
