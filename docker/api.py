@@ -1,3 +1,4 @@
+import time
 from flask import Flask, jsonify, request
 from pyspark.ml import PipelineModel
 import json
@@ -7,6 +8,7 @@ import pandas as pd
 from pyspark.ml import PipelineModel
 from pymongo import MongoClient
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+from datetime import datetime
 app = Flask(__name__)
 client = MongoClient('mongodb', 27017)
 db = client['twitter_database']
@@ -59,7 +61,7 @@ def predict():
             prediction = row["prediction"]
         
         # Create a dictionary with the extracted fields
-            data_dict = {"Tweet ID": tweet_id,"Entity":tweet_entity, "Tweet content": tweet_content, "Sentiment": prediction}
+            data_dict = {"Tweet ID": tweet_id,"Entity":tweet_entity, "Tweet content": tweet_content, "Sentiment": prediction, "timestamp": datetime.now()}
             data_dict_list.append(data_dict)
 
         print(data_dict_list[0])
@@ -74,4 +76,4 @@ def predict():
     
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=(5000))
