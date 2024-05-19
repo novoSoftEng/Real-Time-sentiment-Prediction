@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from collections import Counter
 
 # Connect to MongoDB
-client = MongoClient('localhost', 27017)
+client = MongoClient('localhost', 27018)
 db = client['twitter_database']
 collection = db['twitter_collection']
 entries = list(collection.find())
